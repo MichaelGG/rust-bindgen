@@ -450,7 +450,8 @@ fn struct_with_aligned_struct() {
             pub x: int32_t,
             pub y: int64_t,
             pub z: int16_t,
-            _bindgen_padding_0_: [u64; 5usize],
+            _bindgen_padding_0_: [u8; 6usize],
+            _bindgen_padding_1_: [u64; 5usize],
         }
         impl ::std::default::Default for foo {
             fn default() -> Self { unsafe { ::std::mem::zeroed() } }
