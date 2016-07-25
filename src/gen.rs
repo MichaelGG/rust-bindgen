@@ -581,24 +581,22 @@ fn gen_padding_fields(ctx: &mut GenCtx,
     let max_field_size = u64_size * MAX_ARRAY_CLONE_LEN;
     let u64_ty = P(mk_ty(ctx, false, vec!["u64".to_owned()]));
     let u8_ty = P(mk_ty(ctx, false, vec!["u8".to_owned()]));
-    let mut size = padding_size;
-
-    // If we can do it with u8s, do it. Otherwise u8 to 8 byte boundary then use u64s
-    let u8_num = if size <= MAX_ARRAY_CLONE_LEN { size } else { size % u64_size };
-    size -= u8_num;
 
     let mut fields = vec![];
-    if u8_num > 0 {
-        fields.push((&u8_ty, u8_num));
-    }
+    if padding_size <= MAX_ARRAY_CLONE_LEN {
+        // Use u8s if possible
+        fields.push((&u8_ty, padding_size));
+    } else {
+        // u64s only; subtract implicit 8-byte pad for alignment
+        let size = padding_size - (padding_size % u64_size);
+        (0..(size / max_field_size))
+            .map(|_| (&u64_ty, MAX_ARRAY_CLONE_LEN))
+            .collect::<Vec<(&P<ast::Ty>, usize)>>();
 
-    (0..(size / max_field_size))
-        .map(|_| (&u64_ty, MAX_ARRAY_CLONE_LEN))
-        .collect::<Vec<(&P<ast::Ty>, usize)>>();
-
-    let u64_num = (size % max_field_size) / u64_size;
-    if u64_num > 0 {
-        fields.push((&u64_ty, u64_num));
+        let u64_num = (size % max_field_size) / u64_size;
+        if u64_num > 0 {
+            fields.push((&u64_ty, u64_num));
+        }
     }
 
     fields.iter()
