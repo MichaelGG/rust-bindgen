@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Breaking
 - Remove `Builder::default` to force the specification of the C header file
   name.
+- No more overflow/crash when padding certain sized structures. (#353)
+- Structs with under 32 bytes of padding required will get a single u8 array
 
 ### Changed
 - Convert `float` and `double` to `f32` and `f64` by default (#348).
